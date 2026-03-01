@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import type { SystemMetricsSnapshot } from "../types/metrics";
+import type { CpuHistoryPoint, SystemMetricsSnapshot } from "../types/metrics";
 
 
 const useMetricsSocket = () => {
     const [data, setData] = useState<SystemMetricsSnapshot | null>(null);
     const [connected, setconnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [cpuHistory, setCpuHistory] = useState<CpuHistoryPoint[]>([]);
 
     const wsRef = useRef<WebSocket | null>(null);
 
@@ -30,6 +31,16 @@ const useMetricsSocket = () => {
                 try {
                     const parsed: SystemMetricsSnapshot = JSON.parse(event.data)
                     setData(parsed)
+
+                    const point: CpuHistoryPoint = {
+                        timestamp: parsed.ts,
+                        usagePercent:
+                            typeof parsed.cpu?.usage_percent === "number"
+                                ? parsed.cpu.usage_percent
+                                : null
+                    }
+
+                    setCpuHistory((prev) => [...prev, point].slice(-30))
                 } catch (err) {
                     console.log("Error parsing metrics", err)
                 }
@@ -67,6 +78,7 @@ const useMetricsSocket = () => {
     return {
         data,
         connected,
+        cpuHistory,
         error
     }
 }

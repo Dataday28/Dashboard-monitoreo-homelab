@@ -61,3 +61,8 @@ export interface SystemMetricsSnapshot {
     temps: TemperatureReading[];
     network: NetworkInfo;
 }
+
+export interface CpuHistoryPoint {
+    timestamp: number;
+    usagePercent: number | null
+}
