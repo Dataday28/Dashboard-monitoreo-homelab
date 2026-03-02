@@ -66,3 +66,10 @@ export interface CpuHistoryPoint {
     timestamp: number;
     usagePercent: number | null
 }
+
+export interface RamHistoryPoint {
+    timestamp: number;
+    used: number | null
+    total: number
+    percent: number | null
+}

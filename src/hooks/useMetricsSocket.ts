@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { CpuHistoryPoint, SystemMetricsSnapshot } from "../types/metrics";
+import type { CpuHistoryPoint, RamHistoryPoint, SystemMetricsSnapshot } from "../types/metrics";
 
 
 const useMetricsSocket = () => {
@@ -7,6 +7,7 @@ const useMetricsSocket = () => {
     const [connected, setconnected] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [cpuHistory, setCpuHistory] = useState<CpuHistoryPoint[]>([]);
+    const [ramHistory, setRamHistory] = useState<RamHistoryPoint[]>([]);
 
     const wsRef = useRef<WebSocket | null>(null);
 
@@ -41,6 +42,21 @@ const useMetricsSocket = () => {
                     }
 
                     setCpuHistory((prev) => [...prev, point].slice(-30))
+
+                    const pointRam: RamHistoryPoint = {
+                        timestamp: parsed.ts,
+                        used: 
+                            typeof parsed.memory?.used === "number"
+                                ? parsed.memory.used
+                                : null,
+                        total: typeof parsed.memory?.total === "number" ? parsed.memory.total : 0,
+                        percent: 
+                            typeof parsed.memory?.percent === "number"
+                                ? parsed.memory.percent
+                                : null
+                    }
+
+                    setRamHistory((prev) => [...prev, pointRam].slice(-30))
                 } catch (err) {
                     console.log("Error parsing metrics", err)
                 }
@@ -79,6 +95,7 @@ const useMetricsSocket = () => {
         data,
         connected,
         cpuHistory,
+        ramHistory,
         error
     }
 }
